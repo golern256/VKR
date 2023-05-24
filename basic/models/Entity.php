@@ -18,6 +18,7 @@ class Entity extends ActiveRecord
         return $this->hasMany(Parametr::class, ['id' => 'param_id'])
             ->via('entityParam');
     }
-}
+
+   }
 
 

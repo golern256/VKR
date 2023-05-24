@@ -22,4 +22,17 @@ class EntityResolver {
 
     }
 
+    public function passAuthentication(): bool{
+
+        $user = new User();
+        $user->name=$this->InputValue['login'];
+        $user->password=$this->InputValue['pass'];
+        $validUser= $user->cheakUserPass($user->name, $user->password);
+        if ($validUser)
+            return $user->cheakUserStatus($user->name);
+        else
+            return false;
+
+    }
+
 }

@@ -7,23 +7,59 @@ use app\models\Rate_Parametr;
 use app\models\Rules;
 use app\models\Rate;
 use app\models\EntityResolver;
+use app\models\User;
+use Yii;
+use yii\filters\AccessControl;
 
-class ApiController extends Controller
+class ApiController  extends Controller
 {
+    public function behaviors()
+    {
+        return [
+            'access' => [
+                'class' => AccessControl::className(),
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'actions' => ['insert-entity'],
+                        'roles' => ['@'], // требуется аутентификация
+                    ],
+                    [
+                        'allow' => true,
+                        'actions' => ['index'],
+                        'roles' => ['?'], // аутентификация не требуется
+                    ],
+                ],
+            ],
+        ];
+    }
+
+
     public function actionIndex(){
         print_r("Hello World");
     }
 
     public function actionInsertEntity(){
+        $response = Yii::$app->response;
+        $response->format = \yii\web\Response::FORMAT_JSON;
+
 
         $resolver = new EntityResolver($this->getArg());
-        $flag=$resolver->addEntity();
-        if($flag==true){
-            print_r("OK");
-        }
-        else{
-            print_r("Error");
-        }
+
+      $status =  $resolver->passAuthentication();
+      if($status){
+          $flag=$resolver->addEntity();
+          if($flag==true){
+              $response->data = ['status' => 'OK'];
+
+          }
+          else{
+              $response->data = ['status' => 'Error'];
+          }
+      }
+      else
+          throw new yii\web\ForbiddenHttpException;
+          $response->data = ['status' => 'Invalid User'];
     }
 
 
@@ -37,4 +73,6 @@ class ApiController extends Controller
         $Resolver = new StringResolver($value);
         $Resolver->resolve();
     }
+
+
 }
